@@ -56,7 +56,7 @@ CATEGORY_KEYWORDS = {
 }
 
 
-@periodic_task(crontab(hour=7, minute=37), name="crawl_jobs") # 12-00 dikurangi 7 jam
+@periodic_task(crontab(hour=6, minute=20), name="crawl_jobs") # 12-00 dikurangi 7 jam
 def crawl_jobs():
     try:
         asyncio.run(crawl_jobs_async())
