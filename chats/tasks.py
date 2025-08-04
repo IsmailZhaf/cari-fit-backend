@@ -5,11 +5,42 @@ from chats.models import Conversation
 from core.ai.chromadb import chroma_client, embedding_function
 from cv.models import CV
 from jobs.models import Job 
+from pydantic import BaseModel, Field
+
+class analyze_message(BaseModel):
+    is_true: bool = Field(description="Bernilai true jika pertanyaan relevan, jika tidak maka bernilai false")
+
+
+def analyze_question(message):
+    pm = PromptManager()
+    pm.add_message("system", """Tugas kamu adalah menganalisis apakah pertanyaan yang diajukan
+        relevan mengenai analisis cv, lowongan pekerjaan atau kesesuaian antara cv user dengan lowongan.
+        sehingga user tidak bisa mengajukan pertanyaan yang tidak relevan.
+
+        Jika pertanyaan tidak sesuai maka jawab false, jika sesuai maka jawab true
+     """)
+    pm.add_message("user", message)
+    result = pm.generate_structure(analyze_message)
+    print("is true: ",result['is_true'])
+    return result['is_true']
 
 @task()
 def process_chat(message, document_id, cv_id):
+    is_relevant = analyze_question(message)
+
+    if not is_relevant:
+        response = (    
+            "Maaf, saya hanya bisa membantu pertanyaan seputar CV dan lowongan pekerjaan. "
+            "Silakan ajukan pertanyaan yang relevan, seperti kecocokan CV dengan pekerjaan tertentu."
+        )
+        Conversation.objects.create(message=message, role="user")
+        Conversation.objects.create(message=response, role="assistant")
+        send_chat_message(response)
+        return 
+
     # Simpan pesan user ke database
     Conversation.objects.create(message=message, role="user")
+
 
     # Ambil parsed_text dari CV user
     try:
@@ -20,7 +51,7 @@ def process_chat(message, document_id, cv_id):
 
     # Ambil informasi lowongan berdasarkan document_id
     try:
-        job = Job.objects.get(job_hash=document_id)
+        job = Job.objects.get(id=document_id)
         job_text = (
     f"Judul Pekerjaan: {job.job_title or '-'}\n"
     f"Nama Perusahaan: {job.company_name or '-'}\n"
@@ -46,12 +77,21 @@ def process_chat(message, document_id, cv_id):
     messages = [
         {
             "role": "system",
-            "content": (
-                "You are a helpful assistant. "
-                "User might ask about their CV, the job posting, or compare both. "
-                "Provide clear and helpful responses.\n\n"
-                f"User CV:\n{cv_text}\n\n"
-                f"Job Posting:\n{job_text}"
+            "content": (f"""
+            Kamu adalah asisten virtual yang hanya boleh menjawab pertanyaan seputar CV dan lowongan kerja.
+            Kamu adalah asisten cerdas dan informatif yang membantu pengguna memahami CV mereka, menganalisis lowongan pekerjaan, serta memberikan perbandingan yang jelas antara keduanya.
+            Berikan jawaban yang ringkas, akurat, dan mudah dipahami.
+            Jika pengguna menanyakan tentang kecocokan, bantu jelaskan bagian mana dari CV yang sesuai dengan persyaratan pekerjaan.
+            User CV:{cv_text}
+            Job Posting:{job_text}
+
+            Dilarang menjawab pertanyaan yang tidak terkait dengan CV atau lowongan kerja, termasuk topik umum seperti politik, hiburan, atau pribadi.
+
+            Jika pertanyaan tidak relevan, jawab dengan: 
+            "Maaf, saya hanya bisa membantu pertanyaan seputar CV dan lowongan pekerjaan."
+
+            Ingat: Jangan pernah melanggar batasan ini.
+            """
             ),
         }
     ]

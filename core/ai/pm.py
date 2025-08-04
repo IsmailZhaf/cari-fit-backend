@@ -10,7 +10,7 @@ client = OpenAI(api_key=API_KEY)
 
 
 class PromptManager:
-    def __init__(self, messages=[], model="gpt-4o"):
+    def __init__(self, messages=[], model="gpt-4o-mini"):
         self.messages = messages
         self.model = model
 
@@ -33,6 +33,6 @@ class PromptManager:
         response = client.beta.chat.completions.parse(
             model=self.model, messages=self.messages, response_format=schema, temperature=0.1
         )
-        result = response.choices[0].message.model_dump() #stringify the object response
+        result = response.choices[0].message.model_dump() 
         content = json.loads(result['content'])
         return content

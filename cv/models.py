@@ -18,7 +18,7 @@ class CV(models.Model):
     user_id = models.CharField(max_length=255, unique=True)
     file_url = models.CharField(max_length=255)
     parsed_text = models.TextField(blank=True, null=True)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='uncategorized')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Uncategorized')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(choices=STATUS_CHOICES, default='pending', max_length=20)
 

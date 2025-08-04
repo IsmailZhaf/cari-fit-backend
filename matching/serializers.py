@@ -5,11 +5,12 @@ import ast
 
 class JobSerializer(serializers.ModelSerializer):
     required_skills = serializers.SerializerMethodField()
+    job_id = serializers.UUIDField(source='id')
 
     class Meta:
         model = Job
         fields = [
-            'job_hash',  # misal sebagai job_id
+            'job_id',  # misal sebagai job_id
             'job_title',
             'company_logo',
             'company_name',

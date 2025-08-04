@@ -48,15 +48,9 @@ def get_collection_by_category(category_name: str):
     )
 
 
-def save_job(job_json: dict, job_hash: str) -> Job:
-    # Jika ada job dengan job_title dan company_name yang sama, hapus yang lama untuk menghindari duplikasi
-    Job.objects.filter(
-        job_title=job_json.get("job_title"),
-        company_name=job_json.get("company_name")
-    ).delete()
-
+def save_job(job_json: dict) -> Job:
     job, created = Job.objects.update_or_create(
-        job_hash=job_hash,
+        url=job_json.get("url"),
         defaults={
             "category": job_json.get("category"),
             "job_title": job_json.get("job_title"),

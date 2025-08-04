@@ -4,12 +4,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def send_notification(message):
+def send_notification(data: dict):
     try:
         channel = get_channel_layer()
         async_to_sync(channel.group_send)('notification', {
             "type": 'send_notification',
-            "message": message,
+            "data": data,
         })
     except Exception as e:
         logger.warning(f"Failed to send notification: {e}")

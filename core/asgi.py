@@ -19,7 +19,7 @@ from .routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(  # ⬅️ Gunakan ini untuk WebSocket
+    "websocket": AuthMiddlewareStack( 
         URLRouter(websocket_urlpatterns)
     ),
 })

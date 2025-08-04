@@ -1,0 +1,15 @@
+services:
+  - type: worker
+    name: huey-worker
+    env: docker
+    plan: free
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings
+      - key: REDIS_URL
+        fromService:
+          name: redis
+          type: redis
+    startCommand: python manage.py run_huey --workers 5
