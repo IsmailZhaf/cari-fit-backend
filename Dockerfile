@@ -20,4 +20,4 @@ RUN pip install -r requirements.txt
 RUN python manage.py collectstatic --noinput
 
 # Jalankan Daphne (ASGI server untuk WebSocket + HTTP)
-CMD ["daphne", "-b", "0.0.0.0", "-p", "10000", "core.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "core.asgi:application"]

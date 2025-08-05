@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-3a_s02=ftik4wu)cnmk&^mceh!!6+y327p6o-#n+pt-$b3n)1_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -89,10 +89,15 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': "channels_redis.core.RedisChannelLayer",
         'CONFIG': {
-            'hosts': [('127.0.0.1',6379)],
+            'hosts': [('redis', 6379)],
             'prefix': 'channels',
         }
     }
+}
+
+HUEY = {
+    'name': 'my-app',
+    'url': 'redis://redis:6379/',  # gunakan nama service redis di docker
 }
 
 
@@ -128,6 +133,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -144,8 +163,10 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 # Media files
 MEDIA_URL = '/media/'
